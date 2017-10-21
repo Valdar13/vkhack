@@ -3,11 +3,15 @@ package ru.vkhack.vk_api;
 import javafx.scene.layout.Pane;
 import ru.vkhack.utils.Parser;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 public class Bot {
+    private static Getter getter = new Getter();
 
     public static void main(String[] args){
 //        new Getter().sendAndReceive("https://api.vk.com/method/photos.getMarketUploadServer" +
@@ -18,7 +22,7 @@ public class Bot {
 //            new Getter().sendAndReceive("https://oauth.vk.com/authorize?client_id=5792770" +
 //                    "&group_ids=155409027&display=popup&" +
 //                        "redirect_uri=blank.html&scope=manage+photos&response_type=token&v=5.68");
-        Getter getter = new Getter();
+//        Getter getter = new Getter();
 
 //        getter.sendAndReceive("https://api.vk.com/method/users.get?user_id=11637405&v=5.68");
 
@@ -71,6 +75,21 @@ public class Bot {
                 "&item_id=1028919&name=Новый_товар&description=Очень_классный_товар&category_id=1" +
                 "&price=100500&main_photo_id=%s" +
                 "&access_token=00ac1e2be709aec6240e075e726d524470d23973047663a959554e35d7f93ce255a251dbf28394aa82ccc", photo_id));
+
+        getUserInfo();
+    }
+
+    static void getUserInfo(){
+        String json = getter.sendAndReceive("https://api.vk.com/method/users.get?user_id=68098233&fields=photo_max_orig&v=5.52");
+        try {
+            BufferedImage userPhoto = ImageIO.read(new URL(Parser.getPhotoRef(json)));
+            ImageIO.write(userPhoto, "JPG",
+                    new File("/Users/victoria/IdeaProjects/vkhack/src/main/resources/userPhoto.jpg"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        getter.sendAndReceive("https://api.vk.com/method/photos.get?owner_id=50943396" +
+                "&album_id=profile&count=1&v=5.52");
 
     }
 

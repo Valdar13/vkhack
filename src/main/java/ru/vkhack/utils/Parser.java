@@ -37,4 +37,10 @@ public class Parser {
 
         return result;
     }
+
+    public static String getPhotoRef(String json){
+        JsonParser parser = new JsonParser();
+        JsonElement response = parser.parse(json).getAsJsonObject().get("response");
+        return response.getAsJsonArray().get(0).getAsJsonObject().get("photo_max_orig").getAsString();
+    }
 }
