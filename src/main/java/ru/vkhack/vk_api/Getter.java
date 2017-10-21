@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Getter {
 
-    String sendAndReceive(String url){
+    public static String sendAndReceive(String url){
         try{
             URL uri = new URL(url);
             HttpURLConnection connection = (HttpURLConnection) uri.openConnection();
