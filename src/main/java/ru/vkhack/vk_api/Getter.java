@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Getter {
 
-    void sendAndReceive(String url){
+    String sendAndReceive(String url){
         try{
             URL uri = new URL(url);
             HttpURLConnection connection = (HttpURLConnection) uri.openConnection();
@@ -23,9 +23,11 @@ public class Getter {
             }
             in.close();
             System.out.println(response.toString());
+            return response.toString();
         } catch (Exception e){
             e.printStackTrace();
         }
+        return "{}";
     }
 
     private void printResponse(InputStream is) throws IOException {
@@ -46,7 +48,7 @@ public class Getter {
         }
     }
 
-    void sendPost(String address, File file){
+    String sendPost(String address, File file){
 //        String params = "file=";
 //        byte[] data = null;
 //        InputStream is = null;
@@ -80,8 +82,15 @@ public class Getter {
             MultipartUtility multipart = new MultipartUtility(address, "UTF-8");
             multipart.addHeaderField("main_photo", "1");
             multipart.addFilePart("file", file);
-            printResponse(multipart.finish());
+            List<String> response = multipart.finish();
+            printResponse(response);
 
+            StringBuffer stringBuffer = new StringBuffer();
+            for (String s : response) {
+                stringBuffer.append(s);
+            }
+
+            return stringBuffer.toString();
 
 //        ----------------------------------------------------------------
 
@@ -95,11 +104,13 @@ public class Getter {
 //            }
 //            data = baos.toByteArray();
         } catch (Exception e) {
+            e.printStackTrace();
         } finally {
 //            try {
 //                if (is != null)
 //                    is.close();
 //            } catch (Exception ex) {}
         }
+        return "{}";
     }
 }
