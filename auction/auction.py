@@ -21,8 +21,24 @@ class Auction():
                                       vk_product_id=product_id,
                                       step=step,
                                       duration=duration,
-                                      end_time=end_time
-        )
+                                      end_time=end_time)
+
+    def end_product(self, product_id):
+        from auction.models import Product
+        product = Product.objects.exclude(status=Product.STATUS.closed)\
+                                 .get(vk_product_id=product_id)
+        product.status = Product.STATUS.closed
+        product.save()
+        best_bid = product.best_bid
+        msg = "Аукцион закончен."
+        if best_bid:
+            msg += " Победившая ставка: {} рублей.".format(best_bid.amount)
+        for vk_user_id in product.vk_users:
+            if vk_user == product.winner_vk_user:
+                self.tell(vk_user, "Аукцион закончен. Ваша ставка победила!")
+            else:
+                self.tell(vk_user, msg)
+        return product
 
     def new_bid(self, product_id, user_id, amount):
         from auction.models import Product, Bid
@@ -31,6 +47,11 @@ class Auction():
         except Product.DoesNotExist:
             self.tell(user_id, 'В данный момент аукцион не идёт.')
         else:
+            if product.is_expired:
+                self.tell(user_id,
+                          'К сожалению, Ваша ставка не может быть принята. '
+                          'Аукцион уже закончился.')
+                return
             best_bid = product.best_bid
             if (not best_bid and amount >= product.initial_bid) or (
                     best_bid and amount >= best_bid.amount + product.step):

@@ -29,6 +29,10 @@ class MessageProcessor(Task):
                                                 initial_bid=int(groups[0]),
                                                 step=int(groups[1]),
                                                 duration=int(groups[2]))
+            match = re.search('#AuctionEnd', data['text'])
+            if match:
+                groups = match.groups()
+                return self.auction.end_product(product_id=product_id)
             else:
                 match = re.search('#bid (\d+)', data['text'])
                 if match:

@@ -1,8 +1,9 @@
  # -*- coding: utf-8 -*-
 from unittest.mock import patch
 from django.test import TestCase
-from vk_callbacks.tasks import MessageProcessor
 
+from auction import Auction
+from vk_callbacks.tasks import MessageProcessor
 
 
 class TestMessageProcessor(TestCase):
@@ -20,10 +21,24 @@ class TestMessageProcessor(TestCase):
                                             step=50,
                                             duration=5)
 
-    #@patch('auction.auction.Auction.new_bid')
+    @patch('auction.auction.Auction.end_product')
+    def test_end_product(self, end_product):
+        product = Auction().new_product(product_id=189,
+                                        initial_bid=1000,
+                                        step=50,
+                                        duration=5)
+        obj = MessageProcessor().process_object('market_comment_new',
+                                                {"id":1,
+                                                 "from_id":123,
+                                                 "date":1508599919,
+                                                 "text":"#AuctionEnd",
+                                                 "item_id": 189})
+        end_product.assert_called_once_with(product_id=189)
+
+
+
     @patch('auction.auction.Auction.tell')
-    def test_new_bid(self, tell):#new_bid):
-        from auction import Auction
+    def test_new_bid(self, tell):
         product = Auction().new_product(product_id=189,
                                         initial_bid=1000,
                                         step=50,
