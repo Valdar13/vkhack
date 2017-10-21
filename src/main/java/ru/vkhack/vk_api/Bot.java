@@ -1,17 +1,21 @@
 package ru.vkhack.vk_api;
 
-import javafx.scene.layout.Pane;
+import ru.vkhack.generating.ImageGenerator2;
+import ru.vkhack.models.Product;
 import ru.vkhack.utils.Parser;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 public class Bot {
     private static Getter getter = new Getter();
+    private static final String PATH_TO_DIR = "/Users/victoria/IdeaProjects/vkhack/src/main/resources/";
+    private static final String COMMUNITY_ID = "155409027";
+    private static Product product = null;
+    private static ImageGenerator2 imgGenerator = new ImageGenerator2();
 
     public static void main(String[] args){
 //        new Getter().sendAndReceive("https://api.vk.com/method/photos.getMarketUploadServer" +
@@ -74,24 +78,81 @@ public class Bot {
         getter.sendAndReceive(String.format("https://api.vk.com/method/market.edit?owner_id=-155409027" +
                 "&item_id=1028919&name=Новый_товар&description=Очень_классный_товар&category_id=1" +
                 "&price=100500&main_photo_id=%s" +
-                "&access_token=00ac1e2be709aec6240e075e726d524470d23973047663a959554e35d7f93ce255a251dbf28394aa82ccc", photo_id));
+                "&access_token=00ac1e2be709aec6240e075e726d524470d23973047663a959554e35d7f93ce255a251dbf28394aa82ccc",
+                photo_id));
 
-        getUserInfo();
+//        getUserInfo();
     }
 
-    static void getUserInfo(){
-        String json = getter.sendAndReceive("https://api.vk.com/method/users.get?user_id=68098233&fields=photo_max_orig&v=5.52");
+    static String[] getUserInfo(String user_id, String local_id /*"68098233"*/){
+        String[] userInfo = new String[2];
+        String json = getter.sendAndReceive(String.format(
+                "https://api.vk.com/method/users.get?user_id=%s&fields=photo_max_orig&v=5.52",
+                user_id));
+        String pathToAva = PATH_TO_DIR + "lot" + local_id + "/userPhoto.jpg";
         try {
-            BufferedImage userPhoto = ImageIO.read(new URL(Parser.getPhotoRef(json)));
+//            BufferedImage userPhoto = ImageIO.read(new URL(Parser.getPhotoRef(json)));
+            userInfo = Parser.getUserInfo(json);
+            BufferedImage userPhoto = ImageIO.read(new URL(userInfo[1]));
             ImageIO.write(userPhoto, "JPG",
-                    new File("/Users/victoria/IdeaProjects/vkhack/src/main/resources/userPhoto.jpg"));
+                    new File(pathToAva));
+            userInfo[1] = pathToAva;
+//            String[] userInfo = Parser.getUserInfo(json);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        getter.sendAndReceive("https://api.vk.com/method/photos.get?owner_id=50943396" +
-                "&album_id=profile&count=1&v=5.52");
+//        json = getter.sendAndReceive("https://api.vk.com/method/photos.get?owner_id=50943396" +
+//                "&album_id=profile&count=1&v=5.52");
 
+        return userInfo; // TODO: return name and path to ava
     }
 
 
+    public static void update(String product_id, String user_id, String bid, String local_id){
+        String pathToActiveImg = PATH_TO_DIR + "lot" + local_id + "/active.png";
+        String[] userInfo = getUserInfo(user_id, local_id);
+        product = new Product(product_id, local_id);
+        try {
+            imgGenerator.updateImageWithUserInfo(pathToActiveImg, /*"/Users/victoria/IdeaProjects/vkhack/src/main/resources/myphoto.jpg"*/userInfo[1], userInfo[0],
+                    bid, local_id, PATH_TO_DIR + "lot" + local_id + "/");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        editMarket(product_id, bid, local_id); // send updated market info to the vk
+    }
+
+    static void editMarket(String product_id  /*"1028919"*/, String bid, String local_id){
+//        getter.sendAndReceive("https://api.vk.com/method/photos.getOwnerCoverPhotoUploadServer" +
+//                "?group_id=155409027&crop_x=0&crop_y=0&crop_x2=1590&crop_y2=400" +
+//                "&access_token=c2c5e4261d542661e411d5df25b7090ae8bb15382ee1d0d82a9f48f0b24469cc0cc9f36400f59e6bfa67c&v=5.64");
+
+        String json = getter.sendAndReceive("https://api.vk.com/method/photos.getMarketUploadServer?" +
+                "group_id=155409027" +
+                "&main_photo=1" +
+                "&crop_x=1000" +
+                "&crop_y=0" +
+                "&crop_width=1700" +
+                "&v=5.68" +
+                "&access_token=00ac1e2be709aec6240e075e726d524470d23973047663a959554e35d7f93ce255a251dbf28394aa82ccc");
+
+        String uploadURL = Parser.getUploadUrl(json);
+
+        String[] photoInfo = Parser.getPhotoInfo(
+                getter.sendPost(uploadURL, new File(/*"/Users/victoria/IdeaProjects/vkhack/src/main/resources/active.png"*/
+                PATH_TO_DIR + "lot" + local_id + "/Updated" + local_id + ".png")));
+
+        String savedPhoto = getter.sendAndReceive(String.format("https://api.vk.com/method/photos.saveMarketPhoto?group_id=155409027" +
+                        "&photo=%s&server=%s&hash=%s&crop_data=%s&crop_hash=%s" +
+                        "&access_token=00ac1e2be709aec6240e075e726d524470d23973047663a959554e35d7f93ce255a251dbf28394aa82ccc"
+                , photoInfo[0], photoInfo[1], photoInfo[2], photoInfo[3], photoInfo[4]));
+
+        String photo_id = Parser.getPhotoId(savedPhoto);
+        getter.sendAndReceive(String.format("https://api.vk.com/method/market.edit?owner_id=-%s" +
+                        "&item_id=%s&name=%s&description=%s&category_id=%s" +
+                        "&price=%s&main_photo_id=%s" +
+                        "&access_token=00ac1e2be709aec6240e075e726d524470d23973047663a959554e35d7f93ce255a251dbf28394aa82ccc"
+                ,COMMUNITY_ID, product_id, product.name, product.description, product.category
+                , bid, photo_id));
+    }
 }
