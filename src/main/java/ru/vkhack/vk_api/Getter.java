@@ -1,8 +1,11 @@
 package ru.vkhack.vk_api;
 
+import ru.vkhack.utils.MultipartUtility;
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
 public class Getter {
 
@@ -37,33 +40,51 @@ public class Getter {
         System.out.println(response.toString());
     }
 
+    private void printResponse(List<String> response){
+        for (String line : response) {
+            System.out.println(line);
+        }
+    }
+
     void sendPost(String address, File file){
-        String params = "file=";
-        byte[] data = null;
-        InputStream is = null;
+//        String params = "file=";
+//        byte[] data = null;
+//        InputStream is = null;
+//
+//        try {
+//            URL url = new URL(address);
+//            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+//            conn.setRequestMethod("POST");
+//            conn.setDoOutput(true);
+//            conn.setDoInput(true);
+//
+//            conn.setRequestProperty("Content-Length", "" + Integer.toString(params.getBytes().length));
+//            OutputStream os = conn.getOutputStream();
+//            BufferedReader fileReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+//            String line = null;
+//            while ((line = fileReader.readLine()) != null)
+//                params = params.concat(line);
+//            data = params.getBytes("UTF-8");
+//            os.write(data);
+//            data = null;
+//            conn.connect();
+//
+//            //Response:
+//            int responseCode= conn.getResponseCode();
+//
+//            printResponse(conn.getInputStream());
 
+
+//        --------------------- NEW --------------------------------------
         try {
-            URL url = new URL(address);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
+            MultipartUtility multipart = new MultipartUtility(address, "UTF-8");
+            multipart.addHeaderField("main_photo", "1");
+            multipart.addFilePart("file", file);
+            printResponse(multipart.finish());
 
-            conn.setRequestProperty("Content-Length", "" + Integer.toString(params.getBytes().length));
-            OutputStream os = conn.getOutputStream();
-            BufferedReader fileReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-            String line = null;
-            while ((line = fileReader.readLine()) != null)
-                params = params.concat(line);
-            data = params.getBytes("UTF-8");
-            os.write(data);
-            data = null;
-            conn.connect();
 
-            //Response:
-            int responseCode= conn.getResponseCode();
+//        ----------------------------------------------------------------
 
-            printResponse(conn.getInputStream());
 //            ByteArrayOutputStream baos = new ByteArrayOutputStream();
 //            is = conn.getInputStream();
 //
@@ -75,10 +96,10 @@ public class Getter {
 //            data = baos.toByteArray();
         } catch (Exception e) {
         } finally {
-            try {
-                if (is != null)
-                    is.close();
-            } catch (Exception ex) {}
+//            try {
+//                if (is != null)
+//                    is.close();
+//            } catch (Exception ex) {}
         }
     }
 }
