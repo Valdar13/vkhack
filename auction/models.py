@@ -17,6 +17,10 @@ class Product(StatusModel, TimeStampedModel):
     end_time = models.DateTimeField()
 
     @property
+    def best_bid(self):
+        return self.bid_set.order_by('-amount').first()
+
+    @property
     def winner(self):
         raise NotImplementedError()
 
@@ -29,3 +33,6 @@ class Bid(TimeStampedModel):
     product = models.ForeignKey(Product)
     vk_user_id = models.CharField(max_length=100)
     amount = models.PositiveIntegerField()
+
+    def __str__(self):
+        return str(self.amount)

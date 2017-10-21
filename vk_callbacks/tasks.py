@@ -1,6 +1,7 @@
 import re
 from celery.task import Task
 from auction import Auction
+from auction.models import Bid
 
 
 class MessageProcessor(Task):
@@ -29,20 +30,51 @@ class MessageProcessor(Task):
                                                 step=int(groups[1]),
                                                 duration=int(groups[2]))
             else:
-                return
-        try:
-            attachments = data['attachments']
-        except KeyError:
-            pass
-        else:
-            for attachment in attachments:
-                if attachment['type'] == 'link' and (
-                        'product' in attachment['link']):
-                    return self.product_chat_request(data)
+                match = re.search('#bid (\d+)', data['text'])
+                if match:
+                    groups = match.groups()
+                    return self.auction.new_bid(product_id=data['item_id'],
+                                                user_id=data['from_id'],
+                                                amount=int(groups[0]))
+        elif message_type == 'message_new':
+            try:
+                attachments = data['attachments']
+            except KeyError:
+                pass
+            else:
+                for attachment in attachments:
+                    if attachment['type'] == 'link' and (
+                            'product' in attachment['link']):
+                        return self.product_chat_request(data)
+                    if attachment['type'] == 'link' and (
+                            attachment['link']['url'] == "https:\/\/m.vk.com\/landings\/moneysend"):
+                        match = re.search('(\d+)', attachment['link']['title'])
+                        groups = match.groups()
+                        if match:
+                            last_bid = Bid.objects.filter(vk_user_id=data['user_id']).last()
+                            if last_bid:
+                                return self.auction.new_bid(product_id=last_bid.product.vk_product_id,
+                                                            user_id=data['user_id'],
+                                                            amount=int(groups[0]))
+                        
+            try:
+                body = data['body']
+            except KeyError:
+                pass
+            else:
+                match = re.search('#bid (\d+)', data['body'])
+                if match:
+                    groups = match.groups()
+                    last_bid = Bid.objects.filter(vk_user_id=data['user_id']).last()
+                    if last_bid:
+                        return self.auction.new_bid(product_id=last_bid.product.vk_product_id,
+                                                    user_id=data['user_id'],
+                                                    amount=int(groups[0]))
 
     def product_chat_request(self, data):
         self.auction.product_chat_request(product_id=None,
                                           user_id=data['user_id'])
+
 
 
 def process_message(message_id):

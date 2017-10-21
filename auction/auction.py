@@ -24,7 +24,34 @@ class Auction():
                                       end_time=end_time
         )
 
+    def new_bid(self, product_id, user_id, amount):
+        from auction.models import Product, Bid
+        try:
+            product = Product.objects.get(vk_product_id=product_id)
+        except Product.DoesNotExist:
+            self.tell(user_id, 'В данный момент аукцион не идёт.')
+        else:
+            best_bid = product.best_bid
+            if (not best_bid and amount >= product.initial_bid) or (
+                    best_bid and amount >= best_bid.amount + product.step):
+                bid = Bid.objects.create(product=product,
+                                         vk_user_id=user_id,
+                                         amount=amount)
+                self.tell(user_id, "Ваша ставка в {} рублей принята!".format(amount))
+                if best_bid:
+                    self.tell(best_bid.vk_user_id, "Ваша ставка ({} рублей) "
+                              "была перебита новой ставкой: {} рублей.".format(
+                                  best_bid.amount, amount))
+                return bid
+            else:
+                self.tell(user_id, "Не удалось перебить ставку: {}".format(
+                    best_bid and best_bid.amount or product.initial_bid))
+
     def product_chat_request(self, product_id, user_id):
+        self.tell(user_id, self.get_greeting(product_id, user_id))
+
+    def tell(self, user_id, message):
         self.vk.method('messages.send', {
             'user_id': user_id,
-            'message': self.get_greeting(product_id, user_id)})
+            'message': message
+        })
