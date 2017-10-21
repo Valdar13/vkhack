@@ -9,12 +9,19 @@ from model_utils.models import StatusModel, TimeStampedModel
 class Product(StatusModel, TimeStampedModel):
 
     STATUS = Choices('open', 'closed')
-    vk_group_id = models.CharField(max_length=100)
+    # vk_group_id = models.CharField(max_length=100)
     vk_product_id = models.CharField(max_length=100)
+    duration = models.PositiveIntegerField()
+    initial_bid = models.PositiveIntegerField()
+    step = models.PositiveIntegerField()
+    end_time = models.DateTimeField()
 
     @property
     def winner(self):
         raise NotImplementedError()
+
+    def __str__(self):
+        return str(self.vk_product_id)
 
 
 class Bid(TimeStampedModel):
