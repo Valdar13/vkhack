@@ -38,9 +38,34 @@ public class Parser {
         return result;
     }
 
-    public static String getPhotoRef(String json){
+//    public static String getPhotoRef(String json){
+//        JsonParser parser = new JsonParser();
+//        JsonElement response = parser.parse(json).getAsJsonObject().get("response");
+//        return response.getAsJsonArray().get(0).getAsJsonObject().get("photo_max_orig").getAsString();
+//    }
+
+    public static String[] getProductInfo(String json){
+        String[] result = new String[5];
         JsonParser parser = new JsonParser();
         JsonElement response = parser.parse(json).getAsJsonObject().get("response");
-        return response.getAsJsonArray().get(0).getAsJsonObject().get("photo_max_orig").getAsString();
+        JsonElement items = response.getAsJsonObject().get("items").getAsJsonArray().get(0);
+        result[0] = items.getAsJsonObject().get("title").getAsString();
+        result[1] = items.getAsJsonObject().get("category").getAsJsonObject().get("id").getAsString();
+        result[2] = items.getAsJsonObject().get("description").getAsString();
+        result[3] = items.getAsJsonObject().get("price").getAsJsonObject().get("amount").getAsString();
+        result[4] = items.getAsJsonObject().get("id").getAsString();
+
+        return result;
+    }
+
+    public static String[] getUserInfo(String json){
+        String[] result = new String[5];
+        JsonParser parser = new JsonParser();
+        JsonElement response = parser.parse(json).getAsJsonObject().get("response").getAsJsonArray().get(0);
+        result[0] = response.getAsJsonObject().get("first_name").getAsString() + " " +
+                response.getAsJsonObject().get("last_name").getAsString();
+        result[1] = response.getAsJsonObject().get("photo_max_orig").getAsString();
+
+        return result;
     }
 }

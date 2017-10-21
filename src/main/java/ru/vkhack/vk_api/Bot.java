@@ -112,6 +112,8 @@ public class Bot {
         String pathToActiveImg = PATH_TO_DIR + "lot" + local_id + "/active.png";
         String[] userInfo = getUserInfo(user_id, local_id);
         product = new Product(product_id, local_id);
+        product.name = replaceSpaces(product.name);
+        product.description = replaceSpaces(product.description);
         try {
             imgGenerator.updateImageWithUserInfo(pathToActiveImg, /*"/Users/victoria/IdeaProjects/vkhack/src/main/resources/myphoto.jpg"*/userInfo[1], userInfo[0],
                     bid, local_id, PATH_TO_DIR + "lot" + local_id + "/");
@@ -154,5 +156,9 @@ public class Bot {
                         "&access_token=00ac1e2be709aec6240e075e726d524470d23973047663a959554e35d7f93ce255a251dbf28394aa82ccc"
                 ,COMMUNITY_ID, product_id, product.name, product.description, product.category
                 , bid, photo_id));
+    }
+
+    private static String replaceSpaces(String str){
+        return str.replace(" ", "\" \"");
     }
 }

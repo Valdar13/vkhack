@@ -9,7 +9,7 @@ import java.io.IOException;
 
 public class ImageGenerator2 {
 
-    public void generateImage(String pathToBackgroundFile,String pathAvatar, String leedName, int maxBid,
+    public void generateImage(String pathToBackgroundFile,String pathAvatar, String leedName, String maxBid,
                                   String pathToResultFile) throws IOException {
         BufferedImage background = ImageIO.read(new File(pathToBackgroundFile));
 
@@ -118,13 +118,13 @@ public class ImageGenerator2 {
 
 
         // Рисуем лого лота
-        addRoundAvatar(g, Avatar, Avatar.getWidth()/ 3,Avatar.getHeight()/3,193,422);
+        addRoundAvatar(g, Avatar, Avatar.getWidth(),Avatar.getHeight(),193,422);
 //        g.drawImage(imageLayer, 30, 50, imageLayer.getWidth(),
 //                imageLayer.getHeight(), null);
 
 // Подписываем номер лота
         g.setPaint(Color.BLACK);
-        g.setFont(new Font("TIMES NEW ROMAN", Font.BOLD, 100));
+        g.setFont(new Font("TIMES NEW ROMAN", Font.BOLD, 75));
        // g.setClip(0,0,background.getWidth(),background.getHeight());
 
 
@@ -139,8 +139,8 @@ public class ImageGenerator2 {
 
         g2.setPaint(Color.BLACK);
 
-        g2.setFont(new Font("ANDALE MONO", Font.BOLD, 60));
-         g2.drawString(leedName.toUpperCase(), 153, 912);
+        g2.setFont(new Font("ANDALE MONO", Font.BOLD, 50));
+         g2.drawString(leedName.toUpperCase(), 153-35, 912);
 
         g2.setPaint(Color.WHITE);
         g2.setFont(new Font("ANDALE MONO", Font.BOLD, 100));

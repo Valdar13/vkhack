@@ -1,6 +1,8 @@
 package ru.vkhack;
 
+import javafx.scene.layout.BorderStroke;
 import ru.vkhack.generating.ImageGenerator;
+import ru.vkhack.vk_api.Bot;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -12,10 +14,10 @@ public class HttpServer {
     public static void main(String[] args) {
         try {
             ServerSocket serverSocket = new ServerSocket(8080);
-            while (true) {
+//            while (true) {
                 Socket socket = serverSocket.accept();
                 new Thread(new SocketProcessor(socket)).start();
-            }
+//            }
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         }
@@ -38,15 +40,15 @@ public class HttpServer {
                 readInputHeaders();
 //                writeResponse("<html><body><h1>Hello from Habrahabr</h1></body></html>");
             } catch (Throwable t) {
-                /*do nothing*/
+                t.printStackTrace();
             } finally {
                 try {
                     s.close();
                 } catch (Throwable t) {
-                    /*do nothing*/
+                    t.printStackTrace();
                 }
             }
-            System.err.println("Client processing finished");
+//            System.err.println("Client processing finished");
         }
 
         private void writeResponse(String s) throws Throwable {
@@ -74,6 +76,25 @@ public class HttpServer {
                             "/Users/victoria/IdeaProjects/vkhack/src/main/resources/result.jpg");
                     writeResponse("Image generated");
                     break;
+                }
+                if (s.contains("updateProduct")){
+
+                    s = s.substring(s.indexOf("?") + 1);
+                    String product_id = s.substring(s.indexOf("product_id="));
+                    product_id = product_id.substring(11, product_id.indexOf("&"));
+
+                    String user_id = s.substring(s.indexOf("user_id="));
+                    user_id = user_id.substring(8, user_id.indexOf("&"));
+
+                    String bid = s.substring(s.indexOf("bid="));
+                    bid = bid.substring(4, bid.indexOf("&"));
+
+                    String local_id = s.substring(s.indexOf("local_id="));
+                    local_id = local_id.substring(9);
+                    if (local_id.contains(" "))
+                        local_id = local_id.split(" ")[0];
+
+                    Bot.update(product_id, user_id, bid, local_id);
                 }
                 System.out.println(s);
             }
