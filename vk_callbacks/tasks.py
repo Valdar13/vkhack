@@ -5,6 +5,8 @@ from auction.models import Chat
 
 
 class MessageProcessor(Task):
+    """Parse VK callbacks, use `Auction` for processing
+    """
 
     @property
     def auction(self):

@@ -3,9 +3,12 @@ import vk_api
 
 from django.conf import settings
 from django.utils import timezone
+from auction.wall_service import WallService
 
 
 class Auction():
+    """Auction logic
+    """
 
     def __init__(self, token=None):
         self.vk = vk_api.VkApi(token=token or settings.VK_GROUP_ACCESS_TOKEN)
@@ -40,6 +43,11 @@ class Auction():
                                                      step=step,
                                                      duration=duration,
                                                      end_time=end_time)
+        WallService().send('start', [
+            ('product_id', product_id),
+            ('price', initial_bid),
+            ('step', step),
+            ('local_id', obj.pk)])
         return obj
 
     def end_product(self, product_id):
@@ -57,6 +65,12 @@ class Auction():
                 self.tell(vk_user, "Аукцион закончен. Ваша ставка победила!")
             else:
                 self.tell(vk_user, msg)
+        WallService().send('close', [
+            ('product_id', product_id),
+            ('user_id', best_bid and best_bid.vk_user_id),
+            ('bid', best_bid and best_bid.amount or 0),
+            ('local_id', product.pk)
+        ])
         return product
 
     def new_bid(self, product_id, user_id, amount):
@@ -83,6 +97,12 @@ class Auction():
                     self.tell(best_bid.vk_user_id, "Ваша ставка ({} рублей) "
                               "была перебита новой ставкой: {} рублей.".format(
                                   best_bid.amount, amount))
+                WallService().send('update', [
+                    ('product_id', product.pk),
+                    ('user_id', user_id),
+                    ('bid', amount),
+                    ('local_id', product.pk)
+                ])
                 return bid
             else:
                 self.tell(user_id, "Не удалось перебить ставку: {}".format(

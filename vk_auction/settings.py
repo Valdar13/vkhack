@@ -151,3 +151,5 @@ if DEBUG:
     REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'].append('rest_framework.renderers.BrowsableAPIRenderer')
 
 VK_GROUP_ACCESS_TOKEN = env('VK_GROUP_ACCESS_TOKEN')
+
+WALL_SERVICE_URL = 'http://app_server:8080'

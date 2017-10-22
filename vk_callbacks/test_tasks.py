@@ -52,6 +52,8 @@ class TestMessageProcessor(TestCase):
                                         initial_bid=1000,
                                         step=50,
                                         duration=5)
+        Auction().product_chat_request(product.vk_product_id, 213)
+
         obj = MessageProcessor().process_object('market_comment_new',
                                                 {"id": 3,
                                                  "date": 1508607991,
@@ -69,11 +71,12 @@ class TestMessageProcessor(TestCase):
         })
         self.assertEqual(obj.amount, 2000)
 
+
         obj = MessageProcessor().process_object(
             'message_new',
             {"id":6, "user_id":213, "body":"PRIVET",
              "attachments":[{"type":"link","link":{
-                 "url":"https:\/\/m.vk.com\/landings\/moneysend","title":"3000 ?4??4??1?.",
+                 "url":"https://m.vk.com/landings/moneysend","title":"3000 ?4??4??1?.",
                  "caption":"Денежный перевод",}}],
              "group_id":155403696}
         )

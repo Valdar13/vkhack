@@ -36,11 +36,25 @@ services:
       dockerfile: docker/group_bot/Dockerfile
     depends_on:
       - db
+      - app_server
     expose:
       - "8000"
     volumes:
       - .:/workdir/app
     links:
       - db:db
+      - app_server:app_server
     entrypoint:
       - /workdir/app/docker/group_bot/run.sh
+
+  app_server:
+    image: anapsix/alpine-java
+    depends_on:
+      - db
+    volumes:
+      - .:/workdir/app
+    ports:
+      - "8080:8080"
+    command: >
+      bash -c "cd /workdir/app/jar &&
+      java -cp vkhack-1.0-SNAPSHOT.jar ru.vkhack.HttpServer 0.0.0.0 8080"
