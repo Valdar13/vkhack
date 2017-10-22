@@ -14,16 +14,16 @@ public class HttpServer {
     public static void main(String[] args) {
         try {
             ServerSocket serverSocket = new ServerSocket(8080);
-//            while (true) {
+            while (true) {
                 Socket socket = serverSocket.accept();
-                new Thread(new SocketProcessor(socket)).start();
-//            }
+                /*new Thread(*/new SocketProcessor(socket).start();/*).start()*/;
+            }
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         }
     }
 
-    static class SocketProcessor implements Runnable {
+    static class SocketProcessor /*implements Runnable */{
 
         private Socket s;
         private InputStream is;
@@ -35,10 +35,10 @@ public class HttpServer {
             this.os = s.getOutputStream();
         }
 
-        public void run() {
+        public void start() {
             try {
-                readInputHeaders();
-//                writeResponse("<html><body><h1>Hello from Habrahabr</h1></body></html>");
+                    readInputHeaders();
+                writeResponse("<html><body><h1>OK</h1></body></html>");
             } catch (Throwable t) {
                 t.printStackTrace();
             } finally {
@@ -77,7 +77,7 @@ public class HttpServer {
                     writeResponse("Image generated");
                     break;
                 }
-                if (s.contains("updateProduct")){
+                if (s.contains("update")){
 
                     s = s.substring(s.indexOf("?") + 1);
                     String product_id = s.substring(s.indexOf("product_id="));
@@ -95,8 +95,9 @@ public class HttpServer {
                         local_id = local_id.split(" ")[0];
 
                     Bot.update(product_id, user_id, bid, local_id);
+                    break;
                 }
-                else  if (s.contains("startAuc")){
+                else  if (s.contains("start")){
 
                     s = s.substring(s.indexOf("?") + 1);
                     String product_id = s.substring(s.indexOf("product_id="));
@@ -114,6 +115,26 @@ public class HttpServer {
                         local_id = local_id.split(" ")[0];
 
                     Bot.start(product_id, local_id, price, step);
+                    break;
+                }else  if (s.contains("close")){
+
+                    s = s.substring(s.indexOf("?") + 1);
+                    String product_id = s.substring(s.indexOf("product_id="));
+                    product_id = product_id.substring(11, product_id.indexOf("&"));
+
+                    String user_id = s.substring(s.indexOf("user_id="));
+                    user_id = user_id.substring(8, user_id.indexOf("&"));
+
+                    String bid = s.substring(s.indexOf("bid="));
+                    bid = bid.substring(4, bid.indexOf("&"));
+
+                    String local_id = s.substring(s.indexOf("local_id="));
+                    local_id = local_id.substring(9);
+                    if (local_id.contains(" "))
+                        local_id = local_id.split(" ")[0];
+
+                    Bot.close(product_id, user_id, bid, local_id);
+                    break;
                 }
                 System.out.println(s);
             }

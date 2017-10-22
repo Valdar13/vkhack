@@ -77,8 +77,8 @@ public class ImageGenerator2 {
 
         // Рисуем лого лота
         addScaledLotImage(gStart, lotImage, (int)(lotImage.getWidth()*1.9),(int)(lotImage.getHeight()*1.9),800,370);
-        addScaledLotImage(gActive, lotImage, lotImage.getWidth(),lotImage.getHeight(),800,370);
-        addScaledLotImage(gClose, lotImage, lotImage.getWidth(),lotImage.getHeight(),800,370);
+        addScaledLotImage(gActive, lotImage, (int)(lotImage.getWidth()*1.9),(int)(lotImage.getHeight()*1.9),800,370);
+        addScaledLotImage(gClose, lotImage, (int)(lotImage.getWidth()*1.9),(int)(lotImage.getHeight()*1.9),800,370);
 
 
 // Подписываем номер лота
@@ -124,7 +124,7 @@ public class ImageGenerator2 {
 
 // Подписываем номер лота
         g.setPaint(Color.BLACK);
-        g.setFont(new Font("TIMES NEW ROMAN", Font.BOLD, 75));
+        g.setFont(new Font("TIMES NEW ROMAN", Font.BOLD, 85));
        // g.setClip(0,0,background.getWidth(),background.getHeight());
 
 
