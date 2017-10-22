@@ -35,6 +35,15 @@ class TestMessageProcessor(TestCase):
                                                  "item_id": 189})
         end_product.assert_called_once_with(product_id=189)
 
+    @patch('auction.auction.Auction.product_chat_request')
+    def test_product_chat_request(self, auction):
+        data = {"id": 62, "out": 0, "user_id": 393204213,
+                "attachments": [{"link": {
+                        "url": "https://m.vk.com/product-111111111_2222222_aaa",
+                    "product": {}, "type": "link"}}]}
+        MessageProcessor().product_chat_request(
+            url="https://m.vk.com/product-111111111_2222222_aaa", data=data)
+        auction.assert_called_once_with(product_id=2222222, user_id=393204213)
 
 
     @patch('auction.auction.Auction.tell')

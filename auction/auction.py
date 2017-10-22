@@ -11,17 +11,36 @@ class Auction():
         self.vk = vk_api.VkApi(token=token or settings.VK_GROUP_ACCESS_TOKEN)
 
     def get_greeting(self, product, user_id):
-        return 'Лот доступен, высылайте деньги.'
+        if not product:
+            return 'Лот не доступен для ставок.'
+        if not product.is_expired:
+            seconds = (product.end_time - timezone.now()).total_seconds()
+            minutes_remain = int(seconds / 60)
+            msg = ("Лот доступен для ставок. "
+                   "Начальная цена: {initial}. Шаг: {step}. "
+                   "Минут до окончания: {minutes}.".format(
+                       initial=product.initial_bid,
+                       step=product.step,
+                       minutes=minutes_remain
+
+                   )
+            )
+            if product.best_bid:
+                msg += " Текущая ставка: {}.".format(product.best_bid)
+        else:
+            msg = "К сожалению, лот не доступен для ставок. Аукцион закончен."
+        return msg
 
     def new_product(self, product_id, initial_bid, step, duration):
         from auction.models import Product
         end_time = timezone.now() + timezone.timedelta(minutes=duration)
-        return Product.objects.create(status=Product.STATUS.open,
-                                      initial_bid=initial_bid,
-                                      vk_product_id=product_id,
-                                      step=step,
-                                      duration=duration,
-                                      end_time=end_time)
+        obj, created = Product.objects.get_or_create(status=Product.STATUS.open,
+                                                     initial_bid=initial_bid,
+                                                     vk_product_id=product_id,
+                                                     step=step,
+                                                     duration=duration,
+                                                     end_time=end_time)
+        return obj
 
     def end_product(self, product_id):
         from auction.models import Product
@@ -33,7 +52,7 @@ class Auction():
         msg = "Аукцион закончен."
         if best_bid:
             msg += " Победившая ставка: {} рублей.".format(best_bid.amount)
-        for vk_user_id in product.vk_users:
+        for vk_user in product.vk_users:
             if vk_user == product.winner_vk_user:
                 self.tell(vk_user, "Аукцион закончен. Ваша ставка победила!")
             else:
@@ -43,7 +62,8 @@ class Auction():
     def new_bid(self, product_id, user_id, amount):
         from auction.models import Product, Bid
         try:
-            product = Product.objects.get(vk_product_id=product_id)
+            product = Product.objects.exclude(status=Product.STATUS.closed)\
+                                     .get(vk_product_id=product_id)
         except Product.DoesNotExist:
             self.tell(user_id, 'В данный момент аукцион не идёт.')
         else:
@@ -69,7 +89,11 @@ class Auction():
                     best_bid and best_bid.amount or product.initial_bid))
 
     def product_chat_request(self, product_id, user_id):
-        self.tell(user_id, self.get_greeting(product_id, user_id))
+        from auction.models import Chat, Product
+        product = Product.objects.filter(vk_product_id=product_id).first()
+        self.tell(user_id, self.get_greeting(product, user_id))
+        if product:
+            Chat.objects.create(product=product, vk_user_id=user_id)
 
     def tell(self, user_id, message):
         self.vk.method('messages.send', {

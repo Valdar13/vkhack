@@ -10,8 +10,7 @@ from model_utils.models import StatusModel, TimeStampedModel
 class Product(StatusModel, TimeStampedModel):
 
     STATUS = Choices('open', 'closed')
-    # vk_group_id = models.CharField(max_length=100)
-    vk_product_id = models.CharField(max_length=100)
+    vk_product_id = models.CharField(max_length=100, unique=True)
     duration = models.PositiveIntegerField()
     initial_bid = models.PositiveIntegerField()
     step = models.PositiveIntegerField()
@@ -45,3 +44,9 @@ class Bid(TimeStampedModel):
 
     def __str__(self):
         return str(self.amount)
+
+
+class Chat(TimeStampedModel):
+
+    product = models.ForeignKey(Product)
+    vk_user_id = models.CharField(max_length=100)
