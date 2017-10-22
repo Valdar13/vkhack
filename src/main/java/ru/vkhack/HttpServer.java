@@ -96,6 +96,25 @@ public class HttpServer {
 
                     Bot.update(product_id, user_id, bid, local_id);
                 }
+                else  if (s.contains("startAuc")){
+
+                    s = s.substring(s.indexOf("?") + 1);
+                    String product_id = s.substring(s.indexOf("product_id="));
+                    product_id = product_id.substring(11, product_id.indexOf("&"));
+
+                    String price = s.substring(s.indexOf("price="));
+                    price = price.substring(6, price.indexOf("&"));
+
+                    String step = s.substring(s.indexOf("step="));
+                    step = step.substring(5, step.indexOf("&"));
+
+                    String local_id = s.substring(s.indexOf("local_id="));
+                    local_id = local_id.substring(9);
+                    if (local_id.contains(" "))
+                        local_id = local_id.split(" ")[0];
+
+                    Bot.start(product_id, local_id, price, step);
+                }
                 System.out.println(s);
             }
         }

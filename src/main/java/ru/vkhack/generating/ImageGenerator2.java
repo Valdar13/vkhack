@@ -76,9 +76,9 @@ public class ImageGenerator2 {
 
 
         // Рисуем лого лота
-        addScaledLotImage(gStart, lotImage, lotImage.getWidth()/2,lotImage.getHeight()/2,800,370);
-        addScaledLotImage(gActive, lotImage, lotImage.getWidth()/2,lotImage.getHeight()/2,800,370);
-        addScaledLotImage(gClose, lotImage, lotImage.getWidth()/2,lotImage.getHeight()/2,800,370);
+        addScaledLotImage(gStart, lotImage, (int)(lotImage.getWidth()*1.9),(int)(lotImage.getHeight()*1.9),800,370);
+        addScaledLotImage(gActive, lotImage, lotImage.getWidth(),lotImage.getHeight(),800,370);
+        addScaledLotImage(gClose, lotImage, lotImage.getWidth(),lotImage.getHeight(),800,370);
 
 
 // Подписываем номер лота

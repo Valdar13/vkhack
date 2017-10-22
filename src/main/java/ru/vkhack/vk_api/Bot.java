@@ -18,6 +18,7 @@ public class Bot {
     private static ImageGenerator2 imgGenerator = new ImageGenerator2();
 
     public static void main(String[] args){
+//        product = new Product("1028919", "1", PATH_TO_DIR + "lot1/");
 //        new Getter().sendAndReceive("https://api.vk.com/method/photos.getMarketUploadServer" +
 //                "?group_id=-155409027" +
 //                "&main_photo=1&crop_x=400&crop_y=50&crop_width=400" +
@@ -108,12 +109,30 @@ public class Bot {
     }
 
 
+    public static void start(String product_id, String local_id, String price, String step){
+        String pathToCurDir = PATH_TO_DIR + "lot" + local_id;
+        product = new Product(product_id, step, local_id, pathToCurDir + "/");
+
+        try {
+            imgGenerator.createTemplatesForLot(pathToCurDir + "/start.png",
+                    pathToCurDir + "/active.png",
+                    pathToCurDir + "/close.png",
+                    pathToCurDir + "/marketPhoto.png",
+                    local_id,
+                    pathToCurDir);
+
+            editMarket(product_id, price, local_id, true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public static void update(String product_id, String user_id, String bid, String local_id){
-        String pathToActiveImg = PATH_TO_DIR + "lot" + local_id + "/active.png";
+        String pathToActiveImg = PATH_TO_DIR + "lot" + local_id + "/templateActive" + local_id + ".png";
         String[] userInfo = getUserInfo(user_id, local_id);
-        product = new Product(product_id, local_id);
-        product.name = replaceSpaces(product.name);
-        product.description = replaceSpaces(product.description);
+//        product = new Product(product_id, local_id, PATH_TO_DIR + "lot" + local_id + "/");
+
         try {
             imgGenerator.updateImageWithUserInfo(pathToActiveImg, /*"/Users/victoria/IdeaProjects/vkhack/src/main/resources/myphoto.jpg"*/userInfo[1], userInfo[0],
                     bid, local_id, PATH_TO_DIR + "lot" + local_id + "/");
@@ -121,10 +140,10 @@ public class Bot {
             e.printStackTrace();
         }
 
-        editMarket(product_id, bid, local_id); // send updated market info to the vk
+        editMarket(product_id, bid, local_id, false); // send updated market info to the vk
     }
 
-    static void editMarket(String product_id  /*"1028919"*/, String bid, String local_id){
+    static void editMarket(String product_id  /*"1028919"*/, String bid, String local_id, boolean needInitDescription){
 //        getter.sendAndReceive("https://api.vk.com/method/photos.getOwnerCoverPhotoUploadServer" +
 //                "?group_id=155409027&crop_x=0&crop_y=0&crop_x2=1590&crop_y2=400" +
 //                "&access_token=c2c5e4261d542661e411d5df25b7090ae8bb15382ee1d0d82a9f48f0b24469cc0cc9f36400f59e6bfa67c&v=5.64");
@@ -150,6 +169,14 @@ public class Bot {
                 , photoInfo[0], photoInfo[1], photoInfo[2], photoInfo[3], photoInfo[4]));
 
         String photo_id = Parser.getPhotoId(savedPhoto);
+
+        if (needInitDescription)
+            product.description = "Шаг: " + product.step + "%0D%0A" + product.description;
+
+        product.name = replaceSpaces(product.name);
+        product.description = replaceSpaces(product.description);
+
+
         getter.sendAndReceive(String.format("https://api.vk.com/method/market.edit?owner_id=-%s" +
                         "&item_id=%s&name=%s&description=%s&category_id=%s" +
                         "&price=%s&main_photo_id=%s" +
@@ -159,6 +186,8 @@ public class Bot {
     }
 
     private static String replaceSpaces(String str){
-        return str.replace(" ", "\" \"");
+//        str = str.replace("\" \"", " ");
+//        return str.replace(" ", "\" \"");
+        return str.replace(" ", "%20");
     }
 }

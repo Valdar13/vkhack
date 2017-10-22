@@ -2,6 +2,12 @@ package ru.vkhack.models;
 import ru.vkhack.utils.Parser;
 import ru.vkhack.vk_api.Getter;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+
 public class Product {
 
     public  String name;
@@ -10,11 +16,11 @@ public class Product {
     public  String price;
     public String id;
     public String localId;
+    public String step;
 
-
-    public Product(String productId, String _localId){
+    public Product(String productId, String step, String _localId, String pathToDir){
         String responce = "https://api.vk.com/method/market.getById?item_ids=-155409027_" +productId+
-                "&v=5.68" + "&access_token=00ac1e2be709aec6240e075e726d524470d23973047663a959554e35d7f93ce255a251dbf28394aa82ccc";
+                "&extended=1&v=5.68" + "&access_token=00ac1e2be709aec6240e075e726d524470d23973047663a959554e35d7f93ce255a251dbf28394aa82ccc";
         String json = Getter.sendAndReceive(responce);
         String [] result = Parser.getProductInfo(json);
 
@@ -25,7 +31,19 @@ public class Product {
         price = result[3];
         id = result[4];
         localId = _localId;
+        this.step = step;
 
-
+        saveImg(result[5], pathToDir + "/marketPhoto.png");
     }
+
+    private void saveImg(String url, String pathToFile){
+        BufferedImage image = null;
+        try {
+            image = ImageIO.read(new URL(url));
+            ImageIO.write(image, "PNG", new File(pathToFile));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

@@ -45,7 +45,7 @@ public class Parser {
 //    }
 
     public static String[] getProductInfo(String json){
-        String[] result = new String[5];
+        String[] result = new String[6];
         JsonParser parser = new JsonParser();
         JsonElement response = parser.parse(json).getAsJsonObject().get("response");
         JsonElement items = response.getAsJsonObject().get("items").getAsJsonArray().get(0);
@@ -54,6 +54,7 @@ public class Parser {
         result[2] = items.getAsJsonObject().get("description").getAsString();
         result[3] = items.getAsJsonObject().get("price").getAsJsonObject().get("amount").getAsString();
         result[4] = items.getAsJsonObject().get("id").getAsString();
+        result[5] = items.getAsJsonObject().get("thumb_photo").getAsString();
 
         return result;
     }
