@@ -52,7 +52,7 @@ class MessageProcessor(Task):
                         return self.product_chat_request(
                             attachment['link']['url'], data)
                     if attachment['type'] == 'link' and (
-                            attachment['link']['url'] == "https:\/\/m.vk.com\/landings\/moneysend"):
+                            attachment['link']['url'] == "https://m.vk.com/landings/moneysend"):
                         match = re.search('(\d+)', attachment['link']['title'])
                         groups = match.groups()
                         if match:
