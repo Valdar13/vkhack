@@ -1,15 +1,16 @@
-import generating.ImageGenerator;
+package ru.vkhack;
 
-import java.io.IOException;
-
+import ru.vkhack.generating.ImageGenerator;
 public class Test {
+
     public static void main(String[] args){
         try {
+
             new ImageGenerator().generateImage(
                     "/Users/victoria/IdeaProjects/vkhack/src/main/resources/back.jpg",
                     new String[]{"/Users/victoria/IdeaProjects/vkhack/src/main/resources/myphoto.jpg"},
                             "/Users/victoria/IdeaProjects/vkhack/src/main/resources/result.jpg");
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

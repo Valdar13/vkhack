@@ -1,0 +1,10 @@
+celery==4.1.0
+Django==1.11.6
+django-environ==0.4.3
+django-extensions==1.9.6
+django-model-utils==3.0.0
+djangorestframework==3.7.1
+gunicorn==19.7.1
+psycopg2==2.7.1
+requests==2.18.4
+vk-api==9.1.1
